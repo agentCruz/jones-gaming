@@ -1,21 +1,37 @@
 import {
   Button,
   Flex,
-  FormControl,
-  FormLabel,
   Heading,
-  Input,
   Stack,
   useColorModeValue,
-  HStack,
-  Avatar,
-  AvatarBadge,
-  IconButton,
-  Center,
 } from "@chakra-ui/react";
-import { SmallCloseIcon } from "@chakra-ui/icons";
+import * as Yup from 'yup';
+import { usePlayerProvider } from "./provider/player.provider";
+import { Form, Formik } from "formik";
+import { TextInputUi } from "./formik/TextInput";
+import { Gap } from "./resources/Gap";
+import { useState } from "react";
+import { CreateUserDto } from "./provider/function/types/user";
+import Router from "next/router";
 
 const AddPlayerForm: React.FC = () => {
+  const { create } = usePlayerProvider() || {};
+
+
+  const initialValues = {
+    username: '',
+    email: '',
+    phone: ''
+  };
+
+  const validationSchema = Yup.object({
+    username: Yup.string().required("Player's username is required"),
+    phone: Yup.string().required('Phone number is required')
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+
   return (
     <Flex
       minH={"100vh"}
@@ -34,75 +50,87 @@ const AddPlayerForm: React.FC = () => {
         my={12}
       >
         <Heading lineHeight={1.1} fontSize={{ base: "2xl", sm: "3xl" }}>
-          User Profile Edit
+          Player creation
         </Heading>
-        <FormControl id="userName">
-          <FormLabel>User Icon</FormLabel>
-          <Stack direction={["column", "row"]} spacing={6}>
-            <Center>
-              <Avatar size="xl" src="https://bit.ly/sage-adebayo">
-                <AvatarBadge
-                  as={IconButton}
-                  size="sm"
-                  rounded="full"
-                  top="-10px"
-                  colorScheme="red"
-                  aria-label="remove Image"
-                  icon={<SmallCloseIcon />}
-                />
-              </Avatar>
-            </Center>
-            <Center w="full">
-              <Button w="full">Change Icon</Button>
-            </Center>
-          </Stack>
-        </FormControl>
-        <FormControl id="userName" isRequired>
-          <FormLabel>User name</FormLabel>
-          <Input
-            placeholder="UserName"
-            _placeholder={{ color: "gray.500" }}
-            type="text"
-          />
-        </FormControl>
-        <FormControl id="email" isRequired>
-          <FormLabel>Email address</FormLabel>
-          <Input
-            placeholder="your-email@example.com"
-            _placeholder={{ color: "gray.500" }}
-            type="email"
-          />
-        </FormControl>
-        <FormControl id="password" isRequired>
-          <FormLabel>Password</FormLabel>
-          <Input
-            placeholder="password"
-            _placeholder={{ color: "gray.500" }}
-            type="password"
-          />
-        </FormControl>
-        <Stack spacing={6} direction={["column", "row"]}>
-          <Button
-            bg={"red.400"}
-            color={"white"}
-            w="full"
-            _hover={{
-              bg: "red.500",
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            bg={"blue.400"}
-            color={"white"}
-            w="full"
-            _hover={{
-              bg: "blue.500",
-            }}
-          >
-            Submit
-          </Button>
-        </Stack>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={async (values, { resetForm }) => {
+            setIsLoading(true);
+            const newValues: CreateUserDto = {
+              username: values.username,
+              email: values.email,
+              phone: values.phone,
+            };
+            create && (await create.createUser(newValues));
+            setIsLoading(false);
+            resetForm();
+          }}
+        >
+          <Form>
+
+            <TextInputUi
+              label="User name"
+              name={'username'}
+              style={{
+                w: '100%',
+                borderRadius: '56px',
+                placeholder: 'User name',
+              }}
+            />
+
+            <TextInputUi
+              label="Email address"
+              name={'email'}
+              style={{
+                w: '100%',
+                borderRadius: '56px',
+                placeholder: 'Email Address',
+              }}
+            />
+
+            <TextInputUi
+              label="Phone number"
+              name={'phone'}
+              style={{
+                w: '100%',
+                borderRadius: '56px',
+                placeholder: 'Phone number',
+              }}
+            />
+
+            <Gap size={5} />
+
+            <Stack spacing={6} direction={["column", "row"]}>
+              <Button
+                bg={"red.400"}
+                color={"white"}
+                w="full"
+                _hover={{
+                  bg: "red.500",
+                }}
+                onClick={() => {
+                  Router.back();
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                isLoading={isLoading}
+                bg={"blue.400"}
+                color={"white"}
+                type={'submit'}
+                w="full"
+                _hover={{
+                  bg: "blue.500",
+                }}
+              >
+                Submit
+              </Button>
+            </Stack>
+          </Form>
+        </Formik>
+
       </Stack>
     </Flex>
   );

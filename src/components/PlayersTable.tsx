@@ -1,4 +1,3 @@
-import { formatter } from "@/utils/formatter";
 import {
   TableContainer,
   Table,
@@ -6,90 +5,72 @@ import {
   Tr,
   Th,
   Tbody,
-  Td,
   Text,
-  Link,
-  Checkbox,
-  HStack,
-  Avatar,
+  Stack,
 } from "@chakra-ui/react";
+import { usePlayerProvider } from "./provider/player.provider";
+import { PlayerItem } from "./PlayerItem";
+import { Gap } from "./resources/Gap";
+import SearchUi from "./resources/SearchUi";
+
 
 const PlayersTable: React.FC = () => {
+  const { getAll, search } = usePlayerProvider() || {};
+
+  let itemListRows = null;
+
+  itemListRows =
+    getAll &&
+    getAll.data &&
+    getAll.data.map((item, index) => {
+      return <PlayerItem key={index} item={item} />;
+    });
+
+
   return (
-    <TableContainer>
-      <Table variant="unstyled" p={5}>
-        <Thead borderRadius={"5px"}>
-          <Tr background="crunchrGrey.100" color="crunchrBlack.900">
-            <Th>{""}</Th>
-            <Th>Name</Th>
-            <Th>Phone Number</Th>
-            <Th>Number of Times Played</Th>
-            <Th>Email</Th>
-            <Th>Favourite Game</Th>
-            <Th>Total Spent</Th>
-          </Tr>
-        </Thead>
-        <Tbody borderBottom={"1px"} borderColor={"crunchrGrey.100"}>
-          <Tr borderBottom={"1px"} borderColor={"crunchrGrey.100"}>
-            <Td>
-              <Checkbox colorScheme={"crunchrGreen"} />
-            </Td>
-            <Td>
-              <Link>
-                <Text>Joseph N</Text>
-              </Link>
-            </Td>
-            <Td>
-              <Text>5g</Text>
-            </Td>
-            <Td>
-              <Td>{formatter.format(10000)}</Td>
-            </Td>
-            <Td>
-              <Text>50</Text>
-            </Td>
-          </Tr>
-          <Tr borderBottom={"1px"} borderColor={"crunchrGrey.100"}>
-            <Td>
-              <Checkbox colorScheme={"crunchrGreen"} />
-            </Td>
-            <Td>
-              <Link>
-                <Text>Joseph N</Text>
-              </Link>
-            </Td>
-            <Td>
-              <Text>5g</Text>
-            </Td>
-            <Td>
-              <Td>{formatter.format(10000)}</Td>
-            </Td>
-            <Td>
-              <Text>50</Text>
-            </Td>
-          </Tr>
-          <Tr borderBottom={"1px"} borderColor={"crunchrGrey.100"}>
-            <Td>
-              <Checkbox colorScheme={"crunchrGreen"} />
-            </Td>
-            <Td>
-              <Link>
-                <Text>Joseph N</Text>
-              </Link>
-            </Td>
-            <Td>
-              <Text>5g</Text>
-            </Td>
-            <Td>
-              <Td>{formatter.format(10000)}</Td>
-            </Td>
-            <Td>
-              <Text>50</Text>
-            </Td>
-          </Tr>
-        </Tbody>
-      </Table>
-    </TableContainer>
+    <>
+      {
+        search && (
+          <>
+            <Stack
+              direction={'row'}
+              justifyContent={'space-between'}
+              align={'center'}
+              p={6}
+            >
+              <Text fontSize={21} fontWeight={'bold'}>
+                Players
+              </Text>
+              <SearchUi
+                placeholder={'Search Player'}
+                value={search.searchState}
+                onChange={(e) => search.setSearchState(e.target.value)}
+              />
+            </Stack>
+          </>
+        )
+      }
+      <Gap size={5} />
+      <TableContainer>
+        <Table variant="unstyled" p={5}>
+          <Thead borderRadius={"5px"}>
+            <Tr background="crunchrGrey.100" color="crunchrBlack.900">
+              <Th>{""}</Th>
+              <Th>Name</Th>
+              <Th>Phone Number</Th>
+              <Th>Number of Times Played</Th>
+              <Th>Total Spent</Th>
+              <Th>Action</Th>
+            </Tr>
+          </Thead>
+          <Tbody borderBottom={"1px"} borderColor={"crunchrGrey.100"}>
+            {itemListRows}
+          </Tbody>
+        </Table>
+      </TableContainer>
+    </>
+
+
   );
 };
 
